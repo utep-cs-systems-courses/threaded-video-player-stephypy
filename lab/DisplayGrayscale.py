@@ -7,9 +7,35 @@
 @python-version: 3.6.5
 '''
 
+import threading
 import cv2
+import numpy as np
+import base64
+import queue
 
 FILE_NAME = '../clip.mp4'
+
+class ThreadQueue:
+    def __init__(self):
+        self.queue = []
+        self.lock = threading.Lock()
+        self.full = threading.Semaphore(0)
+        self.empty = threading.Semaphore(24)
+
+    def put(self, item):
+        empty.acquire()
+        lock.acquire()
+        queue.append(item)
+        lock.release()
+        full.release()
+
+    def get(self):
+        full.acquire()
+        lock.acquire()
+        item = queue.pop(0)
+        lock.release()
+        empty.release()
+
 
 def extract_frames(frame_queue):
     '''
@@ -36,12 +62,22 @@ def extract_frames(frame_queue):
     print('Frame extraction complete')
 
 
-def convert_grayscale():
+def convert_grayscale(color_frames, gray_frames):
     '''
     Converts frames to grayscale
     '''
-    pass
+    # Initialize frame count
+    count = 0
 
+    # Iterate through frames
+    while not color_frames.empty():
+        # dequeue the color_frames
+        # obtain the curr color frame
+        # turn curr color frame into grayscale_
+        # enqueue gray frame into gray_frames
+        count += 1
+        # TODO: delete next line when done
+        break
 
 def display_frames(all_frames):
     '''
