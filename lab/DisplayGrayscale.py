@@ -29,6 +29,7 @@ class ThreadQueue:
         self.lock.release()
         self.full.release()
 
+
     def get(self):
         self.full.acquire()
         self.lock.acquire()
@@ -36,6 +37,10 @@ class ThreadQueue:
         self.lock.release()
         self.empty.release()
         return item
+
+
+    def is_empty(self):
+        return self.queue.empty()
 
 
 def extract_frames(filename, frame_queue):
@@ -71,7 +76,7 @@ def convert_grayscale(color_frames, gray_frames):
     count = 0
 
     # Iterate through frames
-    while not color_frames.empty():
+    while not color_frames.is_empty():
         # dequeue the color_frames
         # obtain the curr color frame
         # turn curr color frame into grayscale_
@@ -88,7 +93,7 @@ def display_frames(all_frames):
     count = 0
 
     # Go through each frame in the buffer until the buffer is empty
-    while not all_frames.empty():
+    while not all_frames.is_empty():
         # Get the next frame
         frame = all_frames.get()
 
@@ -99,7 +104,6 @@ def display_frames(all_frames):
         cv2.imshow('Video', frame)
         if cv2.waitKey(42) and 0xFF == ord("q"):
             break
-
         count += 1
 
     print('Finished displaying all frames')
@@ -112,7 +116,7 @@ def main():
     Start of code
     '''
     color_frames = ThreadQueue()
-    gray_frames = ThreadQueue()
+    #gray_frames = ThreadQueue()
 
     extract = threading.Thread(target = extract_frames, args = (FILE_NAME, color_frames))
     #display = threading.Thread(target = display_frames, args = (color_frames,))
