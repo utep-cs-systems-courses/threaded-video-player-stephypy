@@ -14,6 +14,7 @@ import base64
 import queue
 
 FILE_NAME = '../clip.mp4'
+YEE_HAW = '\U0001F920'
 
 class ThreadQueue:
     def __init__(self):
@@ -33,14 +34,10 @@ class ThreadQueue:
     def get(self):
         self.full.acquire()
         self.lock.acquire()
-        item = queue.pop(0)
+        item = self.queue.pop(0)
         self.lock.release()
         self.empty.release()
         return item
-
-
-    def is_empty(self):
-        return self.queue.empty()
 
 
 def extract_frames(filename, frame_queue):
@@ -66,6 +63,7 @@ def extract_frames(filename, frame_queue):
         count += 1
 
     print('Frame extraction complete')
+    frame_queue.put(YEE_HAW)
 
 
 def convert_grayscale(color_frames, gray_frames):
@@ -92,8 +90,11 @@ def display_frames(all_frames):
     # Initialize frame count
     count = 0
 
+    # Get the next frame
+    frame = all_frames.get()
+
     # Go through each frame in the buffer until the buffer is empty
-    while not all_frames.is_empty():
+    while frame is not YEE_HAW:
         # Get the next frame
         frame = all_frames.get()
 
@@ -115,14 +116,15 @@ def main():
     '''
     Start of code
     '''
+
     color_frames = ThreadQueue()
-    #gray_frames = ThreadQueue()
+    gray_frames = ThreadQueue()
 
     extract = threading.Thread(target = extract_frames, args = (FILE_NAME, color_frames))
-    #display = threading.Thread(target = display_frames, args = (color_frames,))
+    display = threading.Thread(target = display_frames, args = (color_frames,))
 
     extract.start()
-    #display.start()
+    display.start()
 
 if __name__ == "__main__":
     main()
