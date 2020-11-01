@@ -73,9 +73,12 @@ def convert_grayscale(color_frames, gray_frames):
     # Initialize frame count
     count = 0
 
+    # First color frame
+    color_frame = color_frames.get()
+
     # Iterate through frames
-    while not color_frames.is_empty():
-        # dequeue the color_frames
+    while color_frame is not YEE_HAW:
+        # Dequeue the color_frames
         # obtain the curr color frame
         # turn curr color frame into grayscale_
         # enqueue gray frame into gray_frames
@@ -95,9 +98,6 @@ def display_frames(all_frames):
 
     # Go through each frame in the buffer until the buffer is empty
     while frame is not YEE_HAW:
-        # Get the next frame
-        frame = all_frames.get()
-
         print(f'Displaying frame {count}')
 
         # Display the image in a window called "video" and wait 42ms
@@ -106,6 +106,9 @@ def display_frames(all_frames):
         if cv2.waitKey(42) and 0xFF == ord("q"):
             break
         count += 1
+
+        # Get the next frame
+        frame = all_frames.get()
 
     print('Finished displaying all frames')
     # Cleanup the windows
@@ -121,9 +124,12 @@ def main():
     gray_frames = ThreadQueue()
 
     extract = threading.Thread(target = extract_frames, args = (FILE_NAME, color_frames))
+    #convert = threading.Thread(target = convert_grayscale, args = (color_frames, gray_frames))
     display = threading.Thread(target = display_frames, args = (color_frames,))
 
+
     extract.start()
+    #convert.start()
     display.start()
 
 if __name__ == "__main__":
