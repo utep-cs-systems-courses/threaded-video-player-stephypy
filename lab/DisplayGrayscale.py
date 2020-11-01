@@ -23,6 +23,7 @@ class ThreadQueue:
         self.full = threading.Semaphore(0)
         self.empty = threading.Semaphore(24)
 
+
     def put(self, item):
         self.empty.acquire()
         self.lock.acquire()
@@ -78,13 +79,22 @@ def convert_grayscale(color_frames, gray_frames):
 
     # Iterate through frames
     while color_frame is not YEE_HAW:
-        # Dequeue the color_frames
-        # obtain the curr color frame
-        # turn curr color frame into grayscale_
-        # enqueue gray frame into gray_frames
+        print(f'Converting frame {count}')
+
+        # Convert the image to grayscale_
+        gray_frame = cv2.cvtColor(color_frame, cv2.COLOR_BGR2GRAY)
+
+        # Enqueue gray_frame into gray_frames
+        gray_frames.put(gray_frame)
+
         count += 1
-        # TODO: delete next line when done
-        break
+
+        # Dequeue next color frame
+        color_frame = color_frames.get()
+
+    print('Conversion to grayscale  complete')
+    gray_frames.put(YEE_HAW)
+
 
 def display_frames(all_frames):
     '''
@@ -119,18 +129,20 @@ def main():
     '''
     Start of code
     '''
-
+    # Queues for frames
     color_frames = ThreadQueue()
     gray_frames = ThreadQueue()
 
+    # Operations to call
     extract = threading.Thread(target = extract_frames, args = (FILE_NAME, color_frames))
-    #convert = threading.Thread(target = convert_grayscale, args = (color_frames, gray_frames))
-    display = threading.Thread(target = display_frames, args = (color_frames,))
+    convert = threading.Thread(target = convert_grayscale, args = (color_frames, gray_frames))
+    display = threading.Thread(target = display_frames, args = (gray_frames,))
 
-
+    # Calling and executing operations
     extract.start()
-    #convert.start()
+    convert.start()
     display.start()
+
 
 if __name__ == "__main__":
     main()
