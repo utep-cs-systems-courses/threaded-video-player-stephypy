@@ -9,9 +9,7 @@
 
 import threading
 import cv2
-import numpy as np
-import base64
-import queue
+
 
 FILE_NAME = '../clip.mp4'
 YEE_HAW = '\U0001F920'
