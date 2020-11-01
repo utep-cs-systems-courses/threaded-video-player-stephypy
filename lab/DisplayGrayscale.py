@@ -23,21 +23,22 @@ class ThreadQueue:
         self.empty = threading.Semaphore(24)
 
     def put(self, item):
-        empty.acquire()
-        lock.acquire()
-        queue.append(item)
-        lock.release()
-        full.release()
+        self.empty.acquire()
+        self.lock.acquire()
+        self.queue.append(item)
+        self.lock.release()
+        self.full.release()
 
     def get(self):
-        full.acquire()
-        lock.acquire()
+        self.full.acquire()
+        self.lock.acquire()
         item = queue.pop(0)
-        lock.release()
-        empty.release()
+        self.lock.release()
+        self.empty.release()
+        return item
 
 
-def extract_frames(frame_queue):
+def extract_frames(filename, frame_queue):
     '''
     Extracts a series of frames given a video
     '''
@@ -45,15 +46,15 @@ def extract_frames(frame_queue):
     count = 0
 
     # Open video file
-    vid_cap = cv2.VideoCapture(FILE_NAME)
+    vid_cap = cv2.VideoCapture(filename)
 
     # Read first image
     success, image = vid_cap.read()
 
     print(f'Reading frame {count} {success}')
     while success:
-        # TODO: Add the frame to the buffer
-        # frame_queue put image
+        # Add the frame to the buffer
+        frame_queue.put(image)
 
         success, image = vid_cap.read()
         print(f'Reading frame {count} {success}')
@@ -88,8 +89,8 @@ def display_frames(all_frames):
 
     # Go through each frame in the buffer until the buffer is empty
     while not all_frames.empty():
-        # TODO: Get the next frame
-        # frame = dequeue all_frames
+        # Get the next frame
+        frame = all_frames.get()
 
         print(f'Displaying frame {count}')
 
@@ -102,16 +103,22 @@ def display_frames(all_frames):
         count += 1
 
     print('Finished displaying all frames')
-    # cleanup the windows
+    # Cleanup the windows
     cv2.destroyAllWindows()
 
 
-def start():
+def main():
     '''
     Start of code
     '''
-    pass
+    color_frames = ThreadQueue()
+    gray_frames = ThreadQueue()
 
+    extract = threading.Thread(target = extract_frames, args = (FILE_NAME, color_frames))
+    #display = threading.Thread(target = display_frames, args = (color_frames,))
+
+    extract.start()
+    #display.start()
 
 if __name__ == "__main__":
-    start()
+    main()
